@@ -1,7 +1,9 @@
 <?php
 
+header("Access-Control-Allow-Origin: *");
+
 error_reporting(E_STRICT);
-error_reporting(E_ALL);
+//error_reporting(E_ALL);
 
 function startswith($init, $str) {
     return substr($str, 0, strlen($init)) == $init;
@@ -98,6 +100,6 @@ function solve_json($json_inp) {
     return answer_to_json(solve(implode(" ", read_input($json_inp))));
 }
 
-print(solve_json('{"cars":[["red",1,3,"x",2]]}')."\n");
+print(solve_json($_GET['query']));
 
 ?>

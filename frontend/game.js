@@ -10,6 +10,10 @@ function mkBoard(sel_div, xdim, ydim, scale) {
     return div;
 }
 
+function solverUrl (query) {
+    return "http://localhost:4123/solver.php?query="+query;
+}
+
 class Game {
     
     constructor(xdim, ydim, cars) {
@@ -47,12 +51,16 @@ class Game {
         this.cars.forEach(car => {
 	    car.pos = car.orientation === "x" ? car.x : car.y;
 	    car.fullPos = car.pos;
-            var images = { 2: "car2.png", 3: "car3.png" };
-            var img = $("<img>");	    
-            img.attr("src", images[car.size]);
-	    img.attr("style", this.carstyle(car));
+            var img = $("<img>");
+	    if(car.id === "red") {
+		car.color = [255, 0, 0];		
+	    } else {
+		car.color = [Math.round(Math.random()*255),Math.round(Math.random()*255),Math.round(Math.random()*255)];
+	    }
+            img.attr("src", `car_img.php?size=${car.size}&R=${car.color[0]}&G=${car.color[1]}&B=${car.color[2]}`);
+	    img.attr("style", this.carstyle(car));	    
             this.board.append(img);
-            car.repr = img;
+            car.repr = img;	    
         });
         
         return this;
@@ -78,6 +86,27 @@ class Game {
 	    car.repr.attr("style", this.carstyle(car));
         }
     }
+
+    findPlan() {
+	var plan;
+	var game = this;
+	
+	function encodeJson(game) {
+	    var encoding = {
+		"cars": []
+	    };
+	    game.cars.forEach(car => {
+		encoding.cars.push([car.id, car.x, car.y, car.orientation, car.size]);
+	    });
+	    return encoding;
+	}
+	$.getJSON(solverUrl(JSON.stringify(encodeJson(this))), resp =>
+		  {
+		      game.plan = new Plan (game, resp);
+		      game.plan.startAnimation(30, 500);
+		      return game.plan;
+		  });
+    }
 };
 
 class Plan {
@@ -95,7 +124,7 @@ class Plan {
     }
 
     tick() {
-	var currentMove = this.moves[Math.floor(this.currentTick / this.ticksPerMove)];
+	var currentMove = this.moves[Math.floor(this.currentTick / this.ticksPerMove)+1];
 	if(this.running && currentMove) {
 	    currentMove.forEach(action => {
 		var id = action[0];

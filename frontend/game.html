@@ -1,43 +1,116 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>    
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" href="game.css">
   </head>
   
   <body>
-    <div id="g1"></div>
+    <h1>Parallel Rush Hour Solver</h1>
+    <h2>The Game</h2>
+    <blockquote>
+      "It will take more than a little skilled driving to get the red car out of this traffic jam – it will take brainpower. In <a href="https://www.thinkfun.com/products/rush-hour/">Rush Hour</a>, a sliding block logic game, you have to battle the gridlock as you slide the blocking vehicles out of the way for the red car to exit. With 40 all-new challenges, ranging in difficulty, players can progress at their own speed. As one of the best logic games of all time, Rush Hour is a must for every household."
+    </blockquote>
+    <p>The goal is to move the red car wholly to the right, where it can exit the board. All the other cars can be moved in either <i>X</i> or <i>Y</i> direction.
+    <h2>The Solver</h2>      
+    <p>This solver is implemented in <a href="https://potassco.org/clingo/">Clingo</a>, a solver for <a href="https://en.wikipedia.org/wiki/Answer_set_programming">Answer Set Problems</a>. Clingo is wrapped in PHP and responds with the shortest plan.</p>
+    <p>
+      The solver exhibits the following features:</p>
+    <ul>
+      <li>It is wholly declarative. No algorithm is ever specified in the Clingo code.</li>
+      <li>It takes parallel moves into account. That is, several cars can move at once.</li>
+      <li>It finds the optimal solution in regards to the number of turns needed, if there is one. This is realized through the <i>incremental</i> solving feature of clingo.</li>
+      <li>It is in the public domain. The source code can be found <a href="https://github.com/firefrorefiddle/rushhour_solver">at Github</a>.</li>
+      </ul>
+    <h2>The Instance</h2>
+    This instance is taken from <a href="http://www.ulb.ac.be/di/algo/secollet/papers/crs06.pdf">a paper</a> by Collette, Raskin and Servals. According to the paper, it takes 93 (single-step) moves to solve. We actually solve it in 46 moves, because we add parallelism.
+    <div id="g1"></div>    
     <script src="game.js"></script>
     <script>
     var game = new Game(6, 6, [
-        { "id": "red",
+        { "id": "1",
 	  "x": 1,
+	  "y": 2,
+	  "size": 2,
+	  "orientation": "y"
+	},
+        { "id": "2",
+	  "x": 2,
+	  "y": 5,
+	  "size": 2,
+	  "orientation": "y"
+	},	
+	{ "id": "3",
+	  "x": 3,
+	  "y": 4,
+	  "size": 2,
+	  "orientation": "y"
+        },
+         { "id": "4",
+	  "x": 4,
+	  "y": 1,
+	  "size": 2,
+	  "orientation": "y"
+	},
+        { "id": "5",
+	  "x": 5,
+	  "y": 1,
+	  "size": 3,
+	  "orientation": "y"
+	},
+        { "id": "6",
+	  "x": 6,
+	  "y": 1,
+	  "size": 3,
+	  "orientation": "y"
+	},
+        { "id": "13",
+	  "x": 1,
+	  "y": 1,
+	  "size": 3,
+	  "orientation": "x"
+	},
+        { "id": "14",
+	  "x": 2,
+	  "y": 2,
+	  "size": 2,
+	  "orientation": "x"
+	},
+        { "id": "red",
+	  "x": 3,
 	  "y": 3,
 	  "size": 2,
 	  "orientation": "x"
 	},
-        { "id": "2",
-	  "x": 4,
+        { "id": "16",
+	  "x": 1,
 	  "y": 4,
-	  "size": 3,
+	  "size": 2,
 	  "orientation": "x"
-	},	
-	{ "id": "1",
+	},
+        { "id": "17",
+	  "x": 5,
+	  "y": 5,
+	  "size": 2,
+	  "orientation": "x"
+	},
+        { "id": "18",
 	  "x": 3,
-	  "y": 1,
-	  "size": 3,
-	  "orientation": "y"
-	}]);
+	  "y": 6,
+	  "size": 2,
+	  "orientation": "x"
+	},
+        { "id": "24",
+	  "x": 5,
+	  "y": 6,
+	  "size": 2,
+	  "orientation": "x"
+	},
+    ]);
+
     game.render("#g1", 50);
-    var plan = new Plan(game, [[["1", 2]],
-			       [["1", 3]],
-			       [["1", 4]],
-			       [["red", 2]],
-			       [["red", 3]],
-			       [["red", 4]],
-			       [["red", 5]]]);
-    plan.startAnimation(30, 500);
-//     game.moveCar("1", 3);
-    </script>    
+
+    </script>
+    <input type="button" value="Solve!" onClick="game.findPlan();">
   </body>
 </html>
